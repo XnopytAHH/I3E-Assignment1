@@ -44,7 +44,7 @@ public class HealthboxBehavior : MonoBehaviour
         if (spawnCount < healthAmount)
         {
             int spawnAngle = UnityEngine.Random.Range(0, rotations.Count);
-            spawnPoint.rotation = Quaternion.Euler(-70, rotations[spawnAngle], 0); // Set the rotation for the health pickup
+            spawnPoint.rotation = Quaternion.Euler(-65, rotations[spawnAngle], 0); // Set the rotation for the health pickup
             rotations.RemoveAt(spawnAngle); // Remove the used rotation to avoid duplicates
             GameObject healthDrop = Instantiate(health, spawnPoint.position, health.transform.rotation);
             Vector3 fireForce = spawnPoint.forward * distance;

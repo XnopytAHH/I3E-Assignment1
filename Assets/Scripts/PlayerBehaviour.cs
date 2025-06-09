@@ -26,11 +26,14 @@ public class PlayerBehaviour : MonoBehaviour
     [SerializeField]
     GameObject gunImage; // Image component to display the gun icon
     bool hasGun = false; // Flag to check if the player has a gun
-    
+     [SerializeField]
+    GameObject damageIndicator; // GameObject to indicate damage taken by the player
+
     void Start()
     {
         healthText.text = "Health: " + currentHealth.ToString(); // Initialize health text
         gunImage.SetActive(false); // Hide the gun image at the start
+        damageIndicator.SetActive(false); // Hide the damage indicator at the start
     }
     void Update()
     {
@@ -85,8 +88,10 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Projectile"))
         {
+            damageIndicator.SetActive(true); // Show the damage indicator when hit by a projectile
             GameObject projectile = collision.gameObject;
             projectile.GetComponent<ProjectileBehavior>().collidedWithPlayer(this);
+             damageIndicator.SetActive(false); // Hide the damage indicator when exiting the hazard
         }
 
     }
@@ -191,6 +196,7 @@ public class PlayerBehaviour : MonoBehaviour
                 currentDoor = null;
             }
         }
+         damageIndicator.SetActive(false); // Hide the damage indicator when exiting the hazard
     }
     void OnFire()
     {
@@ -203,5 +209,15 @@ public class PlayerBehaviour : MonoBehaviour
         }
 
     }
+    void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Hazard"))
+        {
+            // If the player is in a hazard area, reduce health over time
+            damageIndicator.SetActive(true); // Show the damage indicator when in the hazard
+            ModifyHealth(-1); // Reduce health by 1 every frame while in the hazard
+        }
+    }
     
+     
 }
