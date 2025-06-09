@@ -442,7 +442,7 @@ Transform:
   m_GameObject: {fileID: 351644084}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.30174035, w: 0.9533902}
-  m_LocalPosition: {x: 0, y: 1.233, z: 0}
+  m_LocalPosition: {x: 0, y: 1.036, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1200,10 +1200,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5af2585e1c4a1642999999d49266f98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthAmount: 1
+  healthAmount: 40
   spawnPoint: {fileID: 351644085}
   health: {fileID: 6032907336153245438, guid: ede889717cd5820478823b21db6e2cde, type: 3}
-  distance: 1000
+  distance: 100
+  spawnDelay: 0.2
 --- !u!65 &1152570832
 BoxCollider:
   m_ObjectHideFlags: 0
