@@ -12,6 +12,7 @@ public class PlayerBehaviour : MonoBehaviour
     bool canInteract = false; // Flag to check if the player can interact with objects
     CollectibleBehaviour currentCoin = null; // Stores the current coin object the player has detected
     DoorBehaviour currentDoor = null; // Stores the current door object the player has detected
+    HealthboxBehavior currentBox = null; // Stores the current health box object the player has detected
     [SerializeField]
     float interactDistance = 2.0f; // Distance within which the player can interact with objects
     [SerializeField]
@@ -25,6 +26,7 @@ public class PlayerBehaviour : MonoBehaviour
     [SerializeField]
     GameObject gunImage; // Image component to display the gun icon
     bool hasGun = false; // Flag to check if the player has a gun
+    
     void Start()
     {
         healthText.text = "Health: " + currentHealth.ToString(); // Initialize health text
@@ -37,13 +39,17 @@ public class PlayerBehaviour : MonoBehaviour
         {
             if (hitInfo.collider.CompareTag("Collectible"))
             {
-                if (currentCoin != null)
-                {
-                    currentCoin.Unhighlight();
-                }
+                // Set the canInteract flag to true
+                // Get the CollectibleBehaviour component from the detected object
                 canInteract = true;
                 currentCoin = hitInfo.collider.GetComponent<CollectibleBehaviour>();
-                currentCoin.Highlight();
+                currentCoin.Highlight(); // Highlight the coin when detected
+            }
+            else if (currentCoin != null)
+            {
+                // If the raycast hits something else, unhighlight the current coin
+                currentCoin.Unhighlight();
+                currentCoin = null; // Reset currentCoin to null
             }
             if (hitInfo.collider.CompareTag("Door"))
             {
@@ -52,11 +58,20 @@ public class PlayerBehaviour : MonoBehaviour
                 canInteract = true;
                 currentDoor = hitInfo.collider.GetComponent<DoorBehaviour>();
             }
+            if (hitInfo.collider.CompareTag("Healthbox"))
+            {
+                // Set the canInteract flag to true
+                // Get the HealthboxBehavior component from the detected object
+                canInteract = true;
+                currentBox = hitInfo.collider.GetComponent<HealthboxBehavior>();
+            }
         }
-        else if (currentCoin != null)
+        else
         {
-            currentCoin.Unhighlight();
-            currentCoin = null;
+            // If the raycast does not hit any object, set canInteract to false
+            canInteract = false;
+            currentDoor = null; // Reset currentDoor to null
+            currentBox = null; // Reset currentBox to null
         }
         if (currentHealth <= 0)
         {
@@ -70,13 +85,8 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Projectile"))
         {
-            
-            // If the player collides with a projectile, reduce health
-            int damageTaken = collision.gameObject.GetComponent<ProjectileBehavior>().projectileDamage ; // Get the damage value from the projectile
-            Debug.Log("Player collided with projectile! Damage Taken: " + damageTaken);
-            ModifyHealth(damageTaken * -1); // Example damage value
-            Debug.Log("Player hit by projectile! Current Health: " + currentHealth);
-            
+            GameObject projectile = collision.gameObject;
+            projectile.GetComponent<ProjectileBehavior>().collidedWithPlayer(this);
         }
 
     }
@@ -98,6 +108,12 @@ public class PlayerBehaviour : MonoBehaviour
                 // This allows the player to open or close the door
                 currentDoor.Interact();
             }
+            else if (currentBox != null)
+            {
+                // Call the Interact method on the health box object
+                // This allows the player to collect health items
+                currentBox.Interact();
+            }
         }
     }
 
@@ -113,7 +129,7 @@ public class PlayerBehaviour : MonoBehaviour
             hasGun = true; // Set the hasGun flag to true
             Debug.Log("Player has collected a gun!"); // Log that the player has collected a gun
             gunImage.SetActive(true); // Activate the gun image in the UI
-            
+
         }
         else if (collectibleType == "coin")
         {
@@ -134,15 +150,15 @@ public class PlayerBehaviour : MonoBehaviour
     {
         // Check if the current health is less than the maximum health
         // If it is, increase the current health by the amount passed as an argument
-        
+
         currentHealth += amount;
-            // Check if the current health exceeds the maximum health
-            // If it does, set the current health to the maximum health
+        // Check if the current health exceeds the maximum health
+        // If it does, set the current health to the maximum health
         if (currentHealth > maxHealth)
         {
-                currentHealth = maxHealth;
+            currentHealth = maxHealth;
         }
-        
+
         healthText.text = "Health: " + currentHealth.ToString(); // Update the health text
     }
 
@@ -183,8 +199,9 @@ public class PlayerBehaviour : MonoBehaviour
             GameObject newProjectile = Instantiate(projectile, spawnPoint.position, projectile.transform.rotation);
             Vector3 fireForce = spawnPoint.forward * fireStrength;
             newProjectile.GetComponent<Rigidbody>().AddForce(fireForce);
-            
+
         }
-       
+
     }
+    
 }
