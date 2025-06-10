@@ -4,7 +4,7 @@ public class CollectibleBehaviour : MonoBehaviour
 {
     // Coin value that will be added to the player's score
     [SerializeField]
-    string collectibleType = "";
+    public string collectibleType = "";
     MeshRenderer meshRenderer;
     [SerializeField]
     Color color1;
@@ -27,7 +27,7 @@ public class CollectibleBehaviour : MonoBehaviour
     public void Collect(PlayerBehaviour player)
     {
         
-        player.ModifyScore(collectibleType);
+        player.collectedSomething(this); // Call the player's method to modify the score
 
         Destroy(gameObject); // Destroy the coin object
     }

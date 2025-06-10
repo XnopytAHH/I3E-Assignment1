@@ -150,4 +150,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projDeathTime: 1
-  projectileDamage: 10
+  projectileDamage: 100
