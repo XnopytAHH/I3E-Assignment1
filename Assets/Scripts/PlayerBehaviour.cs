@@ -6,6 +6,8 @@ using TMPro;
 using Microsoft.Unity.VisualStudio.Editor;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using StarterAssets;
+using System.Security.Cryptography;
 public class PlayerBehaviour : MonoBehaviour
 {
     [SerializeField]
@@ -47,6 +49,7 @@ public class PlayerBehaviour : MonoBehaviour
         gunImage.SetActive(false); // Hide the gun image at the start
         damageIndicator.SetActive(false); // Hide the damage indicator at the start
         DeathUI.enabled = false; // Disable the death UI
+        Respawn(); // Call the Respawn method to set the player's initial position and state
     }
     void Update()
     {
@@ -124,24 +127,17 @@ public class PlayerBehaviour : MonoBehaviour
     // This method is called when the player presses the interact button
     void Death()
     {
-        // Reset the player's position to the spawn point
-        transform.position = playerSpawnPoint.position;
-        // Reset the player's health to maximum
-        currentHealth = maxHealth;
-        // Update the health text to reflect the new health value
-        healthText.text = "Health: " + currentHealth.ToString();
-
-
         PlayerUI.enabled = false; // Disable the main player UI
         DeathUI.enabled = true; // Enable the death UI
         Cursor.lockState = CursorLockMode.None; // Unlock the cursor
-
-
+        
+        gameObject.GetComponent<FirstPersonController>().enabled = false; // Disable the character controller to prevent movement
+        
     }
     public void Respawn()
     {
         // Reset the player's position to the spawn point
-        transform.position = playerSpawnPoint.position;
+        
         // Reset the player's health to maximum
         currentHealth = maxHealth;
         // Update the health text to reflect the new health value
@@ -150,7 +146,17 @@ public class PlayerBehaviour : MonoBehaviour
         PlayerUI.enabled = true; // Enable the main player UI
         DeathUI.enabled = false; // Disable the death UI
         Cursor.lockState = CursorLockMode.Locked; // Lock the cursor to the center of the screen
+        Debug.Log("Respawning at: " + playerSpawnPoint.position);
+        transform.position = playerSpawnPoint.position;
+        Physics.SyncTransforms();
+        gameObject.GetComponent<FirstPersonController>().enabled = true; // Re-enable the character controller to allow movement
+        Debug.Log(gameObject.name); // Log a message to the console for debugging purposes
+        
 
+    }
+    public void test()
+    {
+        Debug.Log("Test function called!"); // Log a message to the console for testing purposes
     }
     void OnCollisionEnter(Collision collision)
     {
@@ -159,7 +165,19 @@ public class PlayerBehaviour : MonoBehaviour
             damageIndicator.SetActive(true); // Show the damage indicator when hit by a projectile
             GameObject projectile = collision.gameObject;
             projectile.GetComponent<ProjectileBehavior>().collidedWithPlayer(this);
-             damageIndicator.SetActive(false); // Hide the damage indicator when exiting the hazard
+            damageIndicator.SetActive(false); // Hide the damage indicator when exiting the hazard
+        }
+        else if (collision.gameObject.CompareTag("Pickup"))
+        {
+            HealthPickupsBehaviour healthPickup = collision.gameObject.GetComponent<HealthPickupsBehaviour>();
+            if (currentHealth >= maxHealth)
+            {
+                return; // If the player's health is already at maximum, do nothing
+            }
+            else
+            {
+                healthPickup.Pickup(); // Call the Pickup method on the health pickup object
+            }
         }
 
     }
