@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class EnemyBehaviour : MonoBehaviour
@@ -11,6 +12,8 @@ public class EnemyBehaviour : MonoBehaviour
     int fireStrength = 10; // Strength of the projectile fire force
     [SerializeField]
     float shootInterval = 2f; // Time interval between shots
+    [SerializeField]
+    float detectionRange = 10f; // Range within which the enemy can detect the player
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -20,7 +23,20 @@ public class EnemyBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Check if the player is within detection range
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player != null)
+        {
+            float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
+            if (distanceToPlayer <= detectionRange)
+            {
+                // Rotate towards the player
+                Vector3 directionToPlayer = -(player.transform.position - transform.position).normalized;
+                directionToPlayer.y = 0; // Keep the rotation on the horizontal plane
+                transform.rotation = Quaternion.LookRotation(directionToPlayer);
 
+            }
+        }
     }
     IEnumerator ShootTimer(float shootInterval)
     {
