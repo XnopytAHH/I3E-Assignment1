@@ -33,7 +33,7 @@ public class HealthboxBehavior : MonoBehaviour
             {
                 rotations.Add(i*(360/healthAmount)); // Add random rotations to the list
             }
-            Debug.Log(rotations);
+            
             StartCoroutine(SpawnHealth(spawnCount)); // Start the coroutine to spawn health pickups
         }
 
