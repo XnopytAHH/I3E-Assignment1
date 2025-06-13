@@ -20,6 +20,7 @@ public class PlayerBehaviour : MonoBehaviour
     DoorBehaviour currentDoor = null; // Stores the current door object the player has detected
     HealthboxBehavior currentBox = null; // Stores the current health box object the player has detected
     ShipComponents currentObj = null; // Stores the current health box object the player has detected
+    PuzzleItemBehaviour currentItem = null; // Stores the current puzzle item object the player has detected
     [SerializeField]
     float interactDistance = 2.0f; // Distance within which the player can interact with objects
     [SerializeField]
@@ -42,6 +43,7 @@ public class PlayerBehaviour : MonoBehaviour
     List<string> objectivesCollected = new List<string>(); // Array to store collected objectives
      [SerializeField]
     GameObject damageIndicator; // GameObject to indicate damage taken by the player
+    bool carryingItem = false; // Flag to check if the player is carrying an item
 
     void Start()
     {
@@ -63,6 +65,7 @@ public class PlayerBehaviour : MonoBehaviour
                 // Set the canInteract flag to true
                 // Get the CollectibleBehaviour component from the detected object
                 canInteract = true;
+
                 currentCollectible = hitInfo.collider.GetComponent<CollectibleBehaviour>();
                 currentCollectible.Highlight(); // Highlight the coin when detected
             }
@@ -78,6 +81,10 @@ public class PlayerBehaviour : MonoBehaviour
                 // Get the CollectibleBehaviour component from the detected object
                 canInteract = true;
                 currentObj = hitInfo.collider.GetComponent<ShipComponents>();
+                if (objectivesCollected.Contains(currentObj.name))
+                {
+                    currentObj.hasCollected = true; // Set hasCollected to true if the objective has already been collected
+                }
                 currentObj.Highlight(); // Highlight the Obj when detected
             }
             else if (currentObj != null)
@@ -100,6 +107,15 @@ public class PlayerBehaviour : MonoBehaviour
                 canInteract = true;
                 currentBox = hitInfo.collider.GetComponent<HealthboxBehavior>();
             }
+            if (hitInfo.collider.CompareTag("PuzzleItem"))
+            {
+                // Set the canInteract flag to true
+                // Get the PuzzleItemBehaviour component from the detected object
+                canInteract = true;
+                currentItem = hitInfo.collider.GetComponent<PuzzleItemBehaviour>();
+                currentItem.Highlight(); // Highlight the puzzle item when detecte d
+            }
+            
         }
         else
         {
@@ -107,16 +123,16 @@ public class PlayerBehaviour : MonoBehaviour
             canInteract = false;
             currentDoor = null; // Reset currentDoor to null
             currentBox = null; // Reset currentBox to null
-            if (currentObj != null )
+            if (currentObj != null)
             {
                 currentObj.Unhighlight(); // Unhighlight the current object if it exists
             }
-            if (currentCollectible != null )
+            if (currentCollectible != null)
             {
                 currentCollectible.Unhighlight(); // Unhighlight the current object if it exists
             }
             currentObj = null; // Reset currentObj to null
-            
+
         }
         if (currentHealth <= 0)
         {
@@ -221,7 +237,16 @@ public class PlayerBehaviour : MonoBehaviour
                     currentObj = null; // Reset currentObj to null
                     currentScore += 1;
                 }
-                
+
+            }
+            else if (currentItem != null)
+            {
+                if (!carryingItem)
+                {
+                    carryingItem = true; // Set the carryingItem flag to true
+                    currentItem.transform.position = spawnPoint.transform.position; // Set the item's position to the spawn point
+                    currentItem.transform.SetParent(spawnPoint.transform); // Set the parent of the item to the player
+                }
             }
         }
     }
@@ -247,6 +272,7 @@ public class PlayerBehaviour : MonoBehaviour
             {
                 objectivesCollected.Add(gameObject.name);
                 Debug.Log("Objective collected: " + gameObject.collectibleType); // Log the collected objective
+                ;
             }
         }
         

@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using UnityEngine;
 
 public class ShipComponents : MonoBehaviour
@@ -7,7 +8,10 @@ public class ShipComponents : MonoBehaviour
     Color hoverColor;
     Color uncollectedColor;
     [SerializeField]
+    Color collectedColor;
+    [SerializeField]
     Material finalMaterial;
+    public bool hasCollected = false;
     void Start()
     {
         meshRenderer = GetComponent<MeshRenderer>();
@@ -16,7 +20,16 @@ public class ShipComponents : MonoBehaviour
 
     public void Highlight()
     {
-        meshRenderer.material.color = hoverColor;
+        if (hasCollected)
+        {
+            meshRenderer.material.color = collectedColor; // Keep the original color if already collected
+        } // Prevent highlighting if already collected
+        else
+        {
+            meshRenderer.material.color = hoverColor;
+        }
+            
+            
     }
     public void Unhighlight()
     {

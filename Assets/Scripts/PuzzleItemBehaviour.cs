@@ -1,10 +1,9 @@
 using UnityEngine;
 
-public class CollectibleBehaviour : MonoBehaviour
+public class PuzzleItemBehaviour : MonoBehaviour
 {
-    // Coin value that will be added to the player's score
     [SerializeField]
-    public string collectibleType = "";
+    public string itemColor = ""; // Color of the puzzle item
     MeshRenderer meshRenderer;
     [SerializeField]
     Color color1;
@@ -17,6 +16,12 @@ public class CollectibleBehaviour : MonoBehaviour
         originalColor = meshRenderer.material.color;
 
     }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
     public void Highlight()
     {
         meshRenderer.material.color = color1;
@@ -24,12 +29,5 @@ public class CollectibleBehaviour : MonoBehaviour
     public void Unhighlight() 
     { 
         meshRenderer.material.color = originalColor;
-    }
-    public void Collect(PlayerBehaviour player)
-    {
-        
-        player.collectedSomething(this); // Call the player's method to modify the score
-
-        Destroy(gameObject); // Destroy the coin object
     }
 }
