@@ -37,6 +37,7 @@ public class ShipComponents : MonoBehaviour
     }
     public void Place()
     {
+        gameObject.layer =0; // Set the layer to Default
         meshRenderer.material = finalMaterial;
         meshRenderer.material.color = finalMaterial.color; // Ensure the color is set to the final material's color
     }

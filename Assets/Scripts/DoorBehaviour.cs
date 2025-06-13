@@ -4,7 +4,7 @@ using UnityEngine.ProBuilder.Shapes;
 
 public class DoorBehaviour : MonoBehaviour
 {
-    bool isLocked = true;
+    public  bool isLocked = true;
     public bool isOpen = false;
     public bool doorOpening = false;
     public bool doorClosing = false;

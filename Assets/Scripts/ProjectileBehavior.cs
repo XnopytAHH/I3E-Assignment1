@@ -43,7 +43,10 @@ public class ProjectileBehavior : MonoBehaviour
     }
     void OnCollisionEnter(Collision collision)
     {
-        
+        if (collision.gameObject.CompareTag("Enemy") && gameObject.name != "EnemyProjectile")
+        {
+            collision.gameObject.GetComponent<EnemyBehaviour>().ModifyHealth(-projectileDamage);
+        }
         Destroy(gameObject);
     }
 }

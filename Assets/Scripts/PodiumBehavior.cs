@@ -51,7 +51,11 @@ public class PodiumBehavior : MonoBehaviour
                 }
             }
             var doorPair = GameObject.FindGameObjectsWithTag("Door");
-            doorPair[0].GetComponent<DoorBehaviour>().checkPuzzle(); // Check the puzzle state for the paired door
+            for (int i = 0; i < doorPair.Length; i++)
+            {
+                doorPair[i].GetComponent<DoorBehaviour>().checkPuzzle(); // Check the puzzle state for the paired door
+            }
+            
         }
         else
         {
