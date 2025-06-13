@@ -20,6 +20,7 @@ public class PlayerBehaviour : MonoBehaviour
     DoorBehaviour currentDoor = null; // Stores the current door object the player has detected
     HealthboxBehavior currentBox = null; // Stores the current health box object the player has detected
     ShipComponents currentObj = null; // Stores the current health box object the player has detected
+    PodiumBehavior currentPodium = null; // Stores the current podium object the player has detected
     PuzzleItemBehaviour currentItem = null; // Stores the current puzzle item object the player has detected
     [SerializeField]
     float interactDistance = 2.0f; // Distance within which the player can interact with objects
@@ -27,6 +28,8 @@ public class PlayerBehaviour : MonoBehaviour
     GameObject projectile = null; // Projectile prefab to instantiate when firing
     [SerializeField]
     Transform spawnPoint; // Transform where the projectile spawns
+    [SerializeField]
+    Transform carryPoint; // Transform where the item is carried
     [SerializeField]
     int fireStrength = 0; // Strength of the projectile fire force
     [SerializeField]
@@ -43,7 +46,7 @@ public class PlayerBehaviour : MonoBehaviour
     List<string> objectivesCollected = new List<string>(); // Array to store collected objectives
      [SerializeField]
     GameObject damageIndicator; // GameObject to indicate damage taken by the player
-    bool carryingItem = false; // Flag to check if the player is carrying an item
+    GameObject carriedItem= null; // Flag to check if the player is carrying an item
 
     void Start()
     {
@@ -115,6 +118,19 @@ public class PlayerBehaviour : MonoBehaviour
                 currentItem = hitInfo.collider.GetComponent<PuzzleItemBehaviour>();
                 currentItem.Highlight(); // Highlight the puzzle item when detecte d
             }
+            else if (currentItem != null)
+            {
+                // If the raycast hits something else, unhighlight the current item
+                currentItem.Unhighlight();
+                currentItem = null; // Reset currentItem to null
+            }
+            if (hitInfo.collider.CompareTag("Puzzle"))
+            {
+                // Set the canInteract flag to true
+                // Get the PodiumBehavior component from the detected object
+                canInteract = true;
+                currentPodium = hitInfo.collider.GetComponent<PodiumBehavior>();
+            }
             
         }
         else
@@ -131,6 +147,13 @@ public class PlayerBehaviour : MonoBehaviour
             {
                 currentCollectible.Unhighlight(); // Unhighlight the current object if it exists
             }
+            if (currentItem != null)
+            {
+                currentItem.Unhighlight(); // Unhighlight the current item if it exists
+            }
+            currentCollectible = null; // Reset currentCollectible to null
+            currentItem = null; // Reset currentItem to null
+            currentPodium = null; // Reset currentPodium to null
             currentObj = null; // Reset currentObj to null
 
         }
@@ -170,10 +193,7 @@ public class PlayerBehaviour : MonoBehaviour
         
 
     }
-    public void test()
-    {
-        Debug.Log("Test function called!"); // Log a message to the console for testing purposes
-    }
+
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Projectile"))
@@ -241,13 +261,53 @@ public class PlayerBehaviour : MonoBehaviour
             }
             else if (currentItem != null)
             {
-                if (!carryingItem)
+                if (carriedItem == null)
                 {
-                    carryingItem = true; // Set the carryingItem flag to true
-                    currentItem.transform.position = spawnPoint.transform.position; // Set the item's position to the spawn point
+                    carriedItem = currentItem.gameObject; // Set the carried item to the current item
+                    currentItem.transform.position = carryPoint.transform.position; // Set the item's position to in front of the spawn point
                     currentItem.transform.SetParent(spawnPoint.transform); // Set the parent of the item to the player
+                    currentItem.GetComponent<Rigidbody>().isKinematic = true; // Make the item kinematic to prevent physics interactions
+                    currentItem.gameObject.layer = 2; // Set the layer to Ignore Raycast to prevent further interactions
                 }
             }
+            else if (currentPodium != null)
+            {
+                if (carriedItem != null && currentPodium.floatingObject == null)
+                {
+                    currentPodium.PlaceObject(carriedItem); // Place the carried item on the podium
+                    carriedItem = null; // Reset the carried item to null
+                }
+                else if (currentPodium.floatingObject != null)
+                {
+                    if (carriedItem != null)
+                    {
+                        Debug.Log("You already have an item in your hands!"); // Log a message if the player is already carrying an item
+                        return; // Exit the method if the player is already carrying an item
+                    }
+                    else
+                    {
+                        carriedItem = currentPodium.floatingObject; // Set the carried item to the floating object on the podium
+                        currentPodium.RemoveObject(); // Remove the floating object from the podium
+                        carriedItem.transform.position = carryPoint.transform.position; // Set the item's position to in front of the spawn point
+                        carriedItem.transform.SetParent(spawnPoint.transform); // Set the parent of the item to the player
+                        carriedItem.GetComponent<Rigidbody>().isKinematic = true; // Make the item kinematic to prevent physics interactions
+                        carriedItem.gameObject.layer = 2; // Set the layer to Ignore Raycast to prevent further interactions
+                    }
+                }
+                else
+                {
+                    Debug.Log("No item to place on the podium!"); // Log a message if no item is carried
+                }
+            }
+
+        }
+        else if (carriedItem != null)
+        {
+            carriedItem.transform.SetParent(null); // Remove the parent of the item to drop it
+            carriedItem.GetComponent<Rigidbody>().isKinematic = false; // Set the item to non-kinematic to allow physics interactions
+            carriedItem.gameObject.layer = 0; // Set the layer back to Default
+            carriedItem = null; // Reset the carried item to null
+
         }
     }
 

@@ -1,17 +1,21 @@
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.ProBuilder.Shapes;
 
 public class PodiumBehavior : MonoBehaviour
 {
     [SerializeField]
     Transform floatingObjectPosition; // Position where the floating object will be placed
-    GameObject floatingObject; // The object that will be placed on the podium
+    public GameObject floatingObject; // The object that will be placed on the podium
     [SerializeField]
-    string correctColor = "";
+    public string correctColor = "";
     public bool ColorIsCorrect = false;
+    [SerializeField]
+    ParticleSystem particles;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        particles.Stop(); // Stop the particle effect initially
     }
 
     // Update is called once per frame
@@ -19,9 +23,10 @@ public class PodiumBehavior : MonoBehaviour
     {
         if (floatingObject != null)
         {
+            
             // Update the position and rotation of the floating object
             floatingObject.transform.position = floatingObjectPosition.position;
-            floatingObject.GetComponent<Transform>().Rotate(0, 1, 0);
+            floatingObject.GetComponent<Transform>().Rotate(0, 0.2f, 0);
 
         }
 
@@ -30,6 +35,7 @@ public class PodiumBehavior : MonoBehaviour
     {
         if (floatingObject == null)
         {
+            particles.Play(); // Play the particle effect when an object is placed on the podium
             // Instantiate the floating object at the specified position
             floatingObject = obj;
             if (floatingObject.GetComponent<PuzzleItemBehaviour>() != null)
@@ -44,6 +50,8 @@ public class PodiumBehavior : MonoBehaviour
                     ColorIsCorrect = false;
                 }
             }
+            var doorPair = GameObject.FindGameObjectsWithTag("Door");
+            doorPair[0].GetComponent<DoorBehaviour>().checkPuzzle(); // Check the puzzle state for the paired door
         }
         else
         {
@@ -52,10 +60,10 @@ public class PodiumBehavior : MonoBehaviour
     }
     public void RemoveObject()
     {
+
         if (floatingObject != null)
         {
-            // Destroy the floating object and reset the reference
-            Destroy(floatingObject);
+            particles.Stop(); // Stop the particle effect when the object is removed
             floatingObject = null;
             ColorIsCorrect = false; // Reset the color check
         }
