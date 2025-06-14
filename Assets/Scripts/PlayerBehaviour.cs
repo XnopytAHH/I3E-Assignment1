@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine.UI;
 using StarterAssets;
@@ -40,6 +41,8 @@ public class PlayerBehaviour : MonoBehaviour
     Canvas DeathUI;
     [SerializeField]
     GameObject gunImage; // Image component to display the gun icon
+    [SerializeField]
+    Sprite gunDisplaySprite; // Sprite for the gun icon
     bool hasGun = false; // Flag to check if the player has a gun
     List<string> objectivesCollected = new List<string>(); // Array to store collected objectives
      [SerializeField]
@@ -83,10 +86,16 @@ public class PlayerBehaviour : MonoBehaviour
     TextMeshProUGUI score;
     [SerializeField]
     TextMeshProUGUI progress;
+
+    [SerializeField]
+    Image tutorialImage; // Image component to display the tutorial icon in the UI
+    [SerializeField]
+    Sprite[] tutorialSprites; // Sprite for the tutorial icon in the UI
     void Start()
     {
         healthText.text = "Health: " + currentHealth.ToString(); // Initialize health text
         gunImage.SetActive(false); // Hide the gun image at the start
+        
         damageIndicator.GetComponent<Image>().CrossFadeAlpha(0.0f, 0.0f, false); // Set the damage indicator to fully transparent at the start
         DeathUI.enabled = false; // Disable the death UI
         Respawn(); // Call the Respawn method to set the player's initial position and state
@@ -116,7 +125,7 @@ public class PlayerBehaviour : MonoBehaviour
         
         score.text = currentScore + "/4";
         progress.text = currentScore * 25 + "%";
-
+        DisplayTutorial(0); // Display the first tutorial image at the start
 
     }
     void Update()
@@ -433,8 +442,8 @@ public class PlayerBehaviour : MonoBehaviour
         {
             hasGun = true; // Set the hasGun flag to true   
             Debug.Log("Player has collected a gun!"); // Log that the player has collected a gun
+            gunImage.GetComponent<Image>().sprite = gunDisplaySprite; // Set the gun image sprite in the UI
             gunImage.SetActive(true); // Activate the gun image in the UI
-
         }
         else if (gameObject.collectibleType == "objective")
         {
@@ -547,6 +556,17 @@ public class PlayerBehaviour : MonoBehaviour
             ModifyHealth(-1); // Reduce health by 1 every frame while in the hazard
         }
     }
-    
-     
+    public void DisplayTutorial(int tutorialNumber)
+    {
+        tutorialImage.CrossFadeAlpha(1.0f, 0.1f, false);
+        tutorialImage.sprite = tutorialSprites[tutorialNumber]; // Set the initial sprite for the tutorial image
+        StartCoroutine(HideTutorialAfterDelay(3.0f)); // Start a coroutine to hide the tutorial image after a delay
+
+    }
+
+    IEnumerator HideTutorialAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        tutorialImage.CrossFadeAlpha(0.0f, 0.7f, false); // Fade out the tutorial image after the delay
+    }
 }

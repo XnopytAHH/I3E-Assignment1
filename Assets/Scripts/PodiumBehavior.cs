@@ -35,7 +35,7 @@ public class PodiumBehavior : MonoBehaviour
     {
         if (floatingObject == null)
         {
-            particles.Play(); // Play the particle effect when an object is placed on the podium
+            
             // Instantiate the floating object at the specified position
             floatingObject = obj;
             if (floatingObject.GetComponent<PuzzleItemBehaviour>() != null)
@@ -44,12 +44,20 @@ public class PodiumBehavior : MonoBehaviour
                 if (floatingObject.GetComponent<PuzzleItemBehaviour>().itemColor == correctColor)
                 {
                     ColorIsCorrect = true;
+                    var correctParticles = particles.main;
+                    correctParticles.startColor = Color.green; // Set particle color to green for correct placement
+                    particles.Play(); // Start the particle effect when the correct object is placed
                 }
                 else
                 {
                     ColorIsCorrect = false;
+                    
+                    var incorrectParticles = particles.main;
+                    incorrectParticles.startColor = Color.red; // Set particle color to red for incorrect placement
+                    particles.Play(); // Start the particle effect when the incorrect object is placed
                 }
             }
+            
             var doorPair = GameObject.FindGameObjectsWithTag("Door");
             for (int i = 0; i < doorPair.Length; i++)
             {
