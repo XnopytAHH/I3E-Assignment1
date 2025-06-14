@@ -79,14 +79,15 @@ public class PlayerBehaviour : MonoBehaviour
     Image BubbleTickImageUI; // Image component to display the Bubble tick icon in the UI
     [SerializeField]
     Sprite TickSprite; // Sprite for the tick icon in the UI
-
-
-
+    [SerializeField]
+    TextMeshProUGUI score;
+    [SerializeField]
+    TextMeshProUGUI progress;
     void Start()
     {
         healthText.text = "Health: " + currentHealth.ToString(); // Initialize health text
         gunImage.SetActive(false); // Hide the gun image at the start
-        damageIndicator.SetActive(false); // Hide the damage indicator at the start
+        damageIndicator.GetComponent<Image>().CrossFadeAlpha(0.0f, 0.0f, false); // Set the damage indicator to fully transparent at the start
         DeathUI.enabled = false; // Disable the death UI
         Respawn(); // Call the Respawn method to set the player's initial position and state
         wingLImageUI.sprite = wingLSprites[0]; // Set the wingL icon sprite
@@ -113,6 +114,8 @@ public class PlayerBehaviour : MonoBehaviour
         GeneratorTickImageUI.enabled = false; // Disable the Generator tick icon in the UI
         BubbleTickImageUI.enabled = false; // Disable the Bubble tick icon in the UI
         
+        score.text = currentScore + "/4";
+        progress.text = currentScore * 25 + "%";
 
 
     }
@@ -217,7 +220,19 @@ public class PlayerBehaviour : MonoBehaviour
             currentObj = null; // Reset currentObj to null
 
         }
-        if (currentHealth <= 0)
+        if (currentHealth > 50)
+        {
+            healthImageUI.sprite = healthSprites[0]; // Set the health icon sprite to healthy
+        }
+        else if (currentHealth > 20)
+        {
+            healthImageUI.sprite = healthSprites[1]; // Set the health icon sprite to wounded
+        }
+        else if (currentHealth > 0)
+        {
+            healthImageUI.sprite = healthSprites[2]; // Set the health icon sprite to injured
+        }
+        else if (currentHealth <= 0)
         {
             Death(); // Call the Death method if health is zero or below
         }
@@ -268,10 +283,12 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Projectile"))
         {
-            damageIndicator.SetActive(true); // Show the damage indicator when hit by a projectile
+            damageIndicator.GetComponent<Image>().color = Color.red; // Set the damage indicator color to red
+            damageIndicator.GetComponent<Image>().CrossFadeAlpha(1.0f, 0.1f, false); // Make the damage indicator fully visible
+            damageIndicator.GetComponent<Image>().CrossFadeAlpha(0.0f, 0.7f, false);
             GameObject projectile = collision.gameObject;
             projectile.GetComponent<ProjectileBehavior>().collidedWithPlayer(this);
-            damageIndicator.SetActive(false); // Hide the damage indicator when exiting the hazard
+            
         }
         else if (collision.gameObject.CompareTag("Pickup"))
         {
@@ -283,6 +300,9 @@ public class PlayerBehaviour : MonoBehaviour
             else
             {
                 healthPickup.Pickup(); // Call the Pickup method on the health pickup object
+                damageIndicator.GetComponent<Image>().color = Color.green; // Set the damage indicator color to green
+                damageIndicator.GetComponent<Image>().CrossFadeAlpha(0.7f, 0.1f, false); // Make the damage indicator fully visible
+                damageIndicator.GetComponent<Image>().CrossFadeAlpha(0.0f, 0.7f, false); // Fade out the damage indicator after a short duration
             }
         }
 
@@ -327,12 +347,12 @@ public class PlayerBehaviour : MonoBehaviour
                     if (currentObj.name == "wingL")
                     {
                         wingLtickImageUI.enabled = true; // Enable the tick icon for wingL
-                        
+
                     }
                     else if (currentObj.name == "wingR")
                     {
                         wingRtickImageUI.enabled = true; // Enable the tick icon for wingR
-                        
+
                     }
                     else if (currentObj.name == "Generator")
                     {
@@ -346,6 +366,7 @@ public class PlayerBehaviour : MonoBehaviour
 
                     currentObj = null; // Reset currentObj to null
                     currentScore += 1;
+                    progress.text = currentScore * 25 + "%";
                 }
 
             }
@@ -428,26 +449,28 @@ public class PlayerBehaviour : MonoBehaviour
             {
                 wingLImageUI.sprite = wingLSprites[1]; // Set the wingL icon sprite
                 wingLImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the wingL icon in the UI
-                
+
             }
             else if (gameObject.name == "wingR")
             {
                 wingRImageUI.sprite = wingRSprites[1]; // Set the wingR icon sprite
                 wingRImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the wingR icon in the UI
-                
+
             }
             else if (gameObject.name == "Generator")
             {
                 GeneratorImageUI.sprite = GeneratorSprites[1]; // Set the Generator icon sprite
                 GeneratorImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the Generator icon in the UI
-                
+
             }
             else if (gameObject.name == "Bubble")
             {
                 BubbleImageUI.sprite = BubbleSprites[1]; // Set the Bubble icon sprite
                 BubbleImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the Bubble icon in the UI
-                
+
             }
+            score.text = objectivesCollected.Count + "/4";
+        
         }
         
     }
@@ -501,7 +524,7 @@ public class PlayerBehaviour : MonoBehaviour
                 currentDoor = null;
             }
         }
-         damageIndicator.SetActive(false); // Hide the damage indicator when exiting the hazard
+         
     }
     void OnFire()
     {
@@ -518,8 +541,9 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (other.CompareTag("Hazard"))
         {
-            // If the player is in a hazard area, reduce health over time
-            damageIndicator.SetActive(true); // Show the damage indicator when in the hazard
+            damageIndicator.GetComponent<Image>().color = Color.red; // Set the damage indicator color to red
+            damageIndicator.GetComponent<Image>().CrossFadeAlpha(1.0f, 0.1f, false); // Make the damage indicator fully visible
+            damageIndicator.GetComponent<Image>().CrossFadeAlpha(0.0f, 0.7f, false); // Fade out the damage indicator after a short duration
             ModifyHealth(-1); // Reduce health by 1 every frame while in the hazard
         }
     }

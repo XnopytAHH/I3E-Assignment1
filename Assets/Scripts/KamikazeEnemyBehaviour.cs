@@ -11,19 +11,20 @@ public class KamikazeEnemyBehaviour : MonoBehaviour
     [SerializeField]
     float fireSpeed = 20f;
     [SerializeField]
-    int explosionDamage = 20; // Strength of the projectile fire force
-    [SerializeField]
     float shootInterval = 5f; // Time interval between shots
     [SerializeField]
     float detectionRange = 10f; // Range within which the enemy can detect the player
     [SerializeField]
     float detonationRange = 10f;
     bool isActive = false; // Flag to control attacks
-    
+    [SerializeField]
+    GameObject explosion;
+    bool isMoving;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-       
+        isMoving = false;
     }
 
     // Update is called once per frame
@@ -32,12 +33,12 @@ public class KamikazeEnemyBehaviour : MonoBehaviour
         if (health <= 0)
         {
             Destroy(gameObject);
-            return; // If health is 0 or less, destroy the enemy and exit the update
+            Explode();
         }
         else
         {
             GameObject player = GameObject.FindWithTag("Player");
-             UnityEngine.Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
+            UnityEngine.Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
             // Check if the player is within detection range
             float distance = UnityEngine.Vector3.Distance(transform.position, player.transform.position);
             if (distance <= detectionRange)
@@ -47,7 +48,7 @@ public class KamikazeEnemyBehaviour : MonoBehaviour
 
                 if (player != null)
                 {
-                   
+
 
                     if (Physics.Raycast(transform.position, directionToPlayer, out hitInfo))
                     {
@@ -74,7 +75,7 @@ public class KamikazeEnemyBehaviour : MonoBehaviour
                 // If the player is out of range, stop shooting
                 isActive = false;
             }
-           
+
             distance = UnityEngine.Vector3.Distance(transform.position, player.transform.position);
             if (distance > detonationRange && isActive)
             {
@@ -82,8 +83,9 @@ public class KamikazeEnemyBehaviour : MonoBehaviour
                 gameObject.GetComponent<Rigidbody>().AddForce(directionToPlayer * fireSpeed);
                 distance = UnityEngine.Vector3.Distance(transform.position, player.transform.position);
             }
-            if (distance <= detonationRange)
+            if (distance <= detonationRange && isMoving)
             {
+                Explode();
                 isActive = false;
             }
         }
@@ -93,11 +95,16 @@ public class KamikazeEnemyBehaviour : MonoBehaviour
     {
         yield return new WaitForSeconds(shootInterval); // Wait for 2 seconds before shooting
         isActive = true;
-        
+        isMoving = true;
+
     }
     public void ModifyHealth(int amount)
     {
         health += amount;
     }
-    
+    void Explode()
+    {
+        Instantiate(explosion, gameObject.transform.position, transform.rotation);
+        Destroy(gameObject);
+    }
 }
