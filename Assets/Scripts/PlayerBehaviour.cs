@@ -1,11 +1,9 @@
 using System;
-
 using UnityEngine;
-
 using TMPro;
-using Microsoft.Unity.VisualStudio.Editor;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEngine.UI;
 using StarterAssets;
 using System.Security.Cryptography;
 public class PlayerBehaviour : MonoBehaviour
@@ -47,6 +45,42 @@ public class PlayerBehaviour : MonoBehaviour
      [SerializeField]
     GameObject damageIndicator; // GameObject to indicate damage taken by the player
     GameObject carriedItem= null; // Flag to check if the player is carrying an item
+    [SerializeField]
+    Sprite[] gunSprites; // Array of sprites for the gun UI
+    [SerializeField]
+    Image gunImageUI; // Image component to display the gun icon in the UI
+    [SerializeField]
+    Sprite[] wingLSprites; // Array of sprites for the gun UI
+    [SerializeField]
+    Image wingLImageUI; // Image component to display the gun icon in the UI
+    [SerializeField]
+    Sprite[] wingRSprites; // Array of sprites for the gun UI
+    [SerializeField]
+    Image wingRImageUI; // Image component to display the gun icon in the UI
+    [SerializeField]
+    Sprite[] GeneratorSprites; // Array of sprites for the gun UI
+    [SerializeField]
+    Image GeneratorImageUI; // Image component to display the gun icon in the UI
+    [SerializeField]
+    Sprite[] BubbleSprites; // Array of sprites for the gun UI
+    [SerializeField]
+    Image BubbleImageUI; // Image component to display the gun icon in the UI
+    [SerializeField]
+    Image healthImageUI; // Image component to display the health icon in the UI
+    [SerializeField]
+    Sprite[] healthSprites; // Array of sprites for the health icon in the UI
+    [SerializeField]
+    Image wingLtickImageUI; // Image component to display the wingL tick icon in the UI
+    [SerializeField]
+    Image wingRtickImageUI; // Image component to display the wingR tick icon in the UI
+    [SerializeField]
+    Image GeneratorTickImageUI; // Image component to display the Generator tick icon in the UI
+    [SerializeField]
+    Image BubbleTickImageUI; // Image component to display the Bubble tick icon in the UI
+    [SerializeField]
+    Sprite TickSprite; // Sprite for the tick icon in the UI
+
+
 
     void Start()
     {
@@ -55,6 +89,32 @@ public class PlayerBehaviour : MonoBehaviour
         damageIndicator.SetActive(false); // Hide the damage indicator at the start
         DeathUI.enabled = false; // Disable the death UI
         Respawn(); // Call the Respawn method to set the player's initial position and state
+        wingLImageUI.sprite = wingLSprites[0]; // Set the wingL icon sprite
+        wingRImageUI.sprite = wingRSprites[0]; // Set the wingR icon sprite
+        GeneratorImageUI.sprite = GeneratorSprites[0]; // Set the Generator icon sprite
+        BubbleImageUI.sprite = BubbleSprites[0]; // Set the Bubble icon sprite
+
+        gunImageUI.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f); // Set the scale of the gun icon in the UI
+
+        wingLImageUI.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f); // Set the scale of the wingL icon in the UI
+
+        wingRImageUI.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f); // Set the scale of the wingR icon in the UI
+
+        GeneratorImageUI.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f); // Set the scale of the Generator icon in the UI
+
+        BubbleImageUI.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f); // Set the scale of the Bubble icon in the UI
+
+        wingLtickImageUI.sprite = TickSprite; // Set the wingL tick icon sprite
+        wingRtickImageUI.sprite = TickSprite; // Set the wingR tick icon sprite
+        GeneratorTickImageUI.sprite = TickSprite; // Set the Generator tick icon sprite
+        BubbleTickImageUI.sprite = TickSprite; // Set the Bubble tick icon sprite
+        wingLtickImageUI.enabled = false; // Disable the wingL tick icon in the UI
+        wingRtickImageUI.enabled = false; // Disable the wingR tick icon in the UI 
+        GeneratorTickImageUI.enabled = false; // Disable the Generator tick icon in the UI
+        BubbleTickImageUI.enabled = false; // Disable the Bubble tick icon in the UI
+        
+
+
     }
     void Update()
     {
@@ -131,7 +191,7 @@ public class PlayerBehaviour : MonoBehaviour
                 canInteract = true;
                 currentPodium = hitInfo.collider.GetComponent<PodiumBehavior>();
             }
-            
+
         }
         else
         {
@@ -160,6 +220,16 @@ public class PlayerBehaviour : MonoBehaviour
         if (currentHealth <= 0)
         {
             Death(); // Call the Death method if health is zero or below
+        }
+        if (hasGun)
+        {
+            gunImageUI.sprite = gunSprites[1]; // Set the gun icon sprite
+            gunImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the gun icon in the UI
+            
+        }
+        else
+        {
+            gunImageUI.sprite = gunSprites[0]; // Set the no gun icon sprite
         }
     }
     // The Interact callback for the Interact Input Action
@@ -254,6 +324,26 @@ public class PlayerBehaviour : MonoBehaviour
 
                     currentObj.Place(); // Place the object if it has already been collected
                     currentObj.tag = "Untagged"; // Remove the tag to prevent further interactions
+                    if (currentObj.name == "wingL")
+                    {
+                        wingLtickImageUI.enabled = true; // Enable the tick icon for wingL
+                        
+                    }
+                    else if (currentObj.name == "wingR")
+                    {
+                        wingRtickImageUI.enabled = true; // Enable the tick icon for wingR
+                        
+                    }
+                    else if (currentObj.name == "Generator")
+                    {
+                        GeneratorTickImageUI.enabled = true; // Enable the tick icon for Generator
+
+                    }
+                    else if (currentObj.name == "Bubble")
+                    {
+                        BubbleTickImageUI.enabled = true; // Enable the tick icon for Bubble
+                    }
+
                     currentObj = null; // Reset currentObj to null
                     currentScore += 1;
                 }
@@ -333,6 +423,30 @@ public class PlayerBehaviour : MonoBehaviour
                 objectivesCollected.Add(gameObject.name);
                 Debug.Log("Objective collected: " + gameObject.collectibleType); // Log the collected objective
                 ;
+            }
+            if (gameObject.name == "wingL")
+            {
+                wingLImageUI.sprite = wingLSprites[1]; // Set the wingL icon sprite
+                wingLImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the wingL icon in the UI
+                
+            }
+            else if (gameObject.name == "wingR")
+            {
+                wingRImageUI.sprite = wingRSprites[1]; // Set the wingR icon sprite
+                wingRImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the wingR icon in the UI
+                
+            }
+            else if (gameObject.name == "Generator")
+            {
+                GeneratorImageUI.sprite = GeneratorSprites[1]; // Set the Generator icon sprite
+                GeneratorImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the Generator icon in the UI
+                
+            }
+            else if (gameObject.name == "Bubble")
+            {
+                BubbleImageUI.sprite = BubbleSprites[1]; // Set the Bubble icon sprite
+                BubbleImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the Bubble icon in the UI
+                
             }
         }
         
