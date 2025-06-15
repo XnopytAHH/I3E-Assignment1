@@ -8,7 +8,8 @@ public class ProjectileBehavior : MonoBehaviour
     float projDeathTime = 5f; // Time after which the projectile will be destroyed
     [SerializeField]
     public int projectileDamage = 10; // Damage dealt by the projectile
-
+    [SerializeField]
+    AudioClip projectileAudioClip; // Audio source for the projectile sound
     bool canDamage = true;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -43,10 +44,12 @@ public class ProjectileBehavior : MonoBehaviour
     }
     void OnCollisionEnter(Collision collision)
     {
+        AudioSource.PlayClipAtPoint(projectileAudioClip, transform.position, 0.3f); // Play the projectile sound on collision
         if (collision.gameObject.CompareTag("Enemy") && gameObject.name != "EnemyProjectile")
         {
             collision.gameObject.GetComponent<EnemyBehaviour>().ModifyHealth(-projectileDamage);
         }
+        
         Destroy(gameObject);
     }
 }

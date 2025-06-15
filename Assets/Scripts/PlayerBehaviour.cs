@@ -7,6 +7,8 @@ using Unity.VisualScripting;
 using UnityEngine.UI;
 using StarterAssets;
 using System.Security.Cryptography;
+using Unity.Collections;
+using UnityEngine.Rendering;
 public class PlayerBehaviour : MonoBehaviour
 {
     [SerializeField]
@@ -45,9 +47,9 @@ public class PlayerBehaviour : MonoBehaviour
     Sprite gunDisplaySprite; // Sprite for the gun icon
     bool hasGun = false; // Flag to check if the player has a gun
     List<string> objectivesCollected = new List<string>(); // Array to store collected objectives
-     [SerializeField]
+    [SerializeField]
     GameObject damageIndicator; // GameObject to indicate damage taken by the player
-    GameObject carriedItem= null; // Flag to check if the player is carrying an item
+    GameObject carriedItem = null; // Flag to check if the player is carrying an item
     [SerializeField]
     Sprite[] gunSprites; // Array of sprites for the gun UI
     [SerializeField]
@@ -91,13 +93,23 @@ public class PlayerBehaviour : MonoBehaviour
     Image tutorialImage; // Image component to display the tutorial icon in the UI
     [SerializeField]
     Sprite[] tutorialSprites; // Sprite for the tutorial icon in the UI
+    int deathCount = 0;
+    [SerializeField]
+    Canvas winScreen; // Canvas to display the win screen
+    [SerializeField]
+    TextMeshProUGUI winText; // Text component to display the win message
+    AudioSource audioSource; // Audio source for playing sounds
+    [SerializeField]
+    AudioClip deathAudioClip; // Audio clip for the death sound
+
     void Start()
     {
         healthText.text = "Health: " + currentHealth.ToString(); // Initialize health text
         gunImage.SetActive(false); // Hide the gun image at the start
-        
+
         damageIndicator.GetComponent<Image>().CrossFadeAlpha(0.0f, 0.0f, false); // Set the damage indicator to fully transparent at the start
         DeathUI.enabled = false; // Disable the death UI
+        winScreen.enabled = false; // Disable the win screen at the start
         Respawn(); // Call the Respawn method to set the player's initial position and state
         wingLImageUI.sprite = wingLSprites[0]; // Set the wingL icon sprite
         wingRImageUI.sprite = wingRSprites[0]; // Set the wingR icon sprite
@@ -122,10 +134,12 @@ public class PlayerBehaviour : MonoBehaviour
         wingRtickImageUI.enabled = false; // Disable the wingR tick icon in the UI 
         GeneratorTickImageUI.enabled = false; // Disable the Generator tick icon in the UI
         BubbleTickImageUI.enabled = false; // Disable the Bubble tick icon in the UI
-        
+
         score.text = currentScore + "/4";
         progress.text = currentScore * 25 + "%";
         DisplayTutorial(0); // Display the first tutorial image at the start
+        audioSource = GetComponent<AudioSource>(); // Get the AudioSource component attached to the player
+
 
     }
     void Update()
@@ -249,7 +263,7 @@ public class PlayerBehaviour : MonoBehaviour
         {
             gunImageUI.sprite = gunSprites[1]; // Set the gun icon sprite
             gunImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the gun icon in the UI
-            
+
         }
         else
         {
@@ -262,15 +276,17 @@ public class PlayerBehaviour : MonoBehaviour
     {
         PlayerUI.enabled = false; // Disable the main player UI
         DeathUI.enabled = true; // Enable the death UI
+        currentHealth = 100; // Set the player's health to zero
         Cursor.lockState = CursorLockMode.None; // Unlock the cursor
-        
+        deathCount += 1; // Increment the death count
         gameObject.GetComponent<FirstPersonController>().enabled = false; // Disable the character controller to prevent movement
-        
+        AudioSource.PlayClipAtPoint(deathAudioClip, transform.position, 0.5f); // Play the death sound effect
+
     }
     public void Respawn()
     {
         // Reset the player's position to the spawn point
-        
+
         // Reset the player's health to maximum
         currentHealth = maxHealth;
         // Update the health text to reflect the new health value
@@ -284,7 +300,7 @@ public class PlayerBehaviour : MonoBehaviour
         Physics.SyncTransforms();
         gameObject.GetComponent<FirstPersonController>().enabled = true; // Re-enable the character controller to allow movement
         Debug.Log(gameObject.name); // Log a message to the console for debugging purposes
-        
+
 
     }
 
@@ -292,12 +308,14 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Projectile"))
         {
+            
             damageIndicator.GetComponent<Image>().color = Color.red; // Set the damage indicator color to red
             damageIndicator.GetComponent<Image>().CrossFadeAlpha(1.0f, 0.1f, false); // Make the damage indicator fully visible
             damageIndicator.GetComponent<Image>().CrossFadeAlpha(0.0f, 0.7f, false);
+            
             GameObject projectile = collision.gameObject;
             projectile.GetComponent<ProjectileBehavior>().collidedWithPlayer(this);
-            
+
         }
         else if (collision.gameObject.CompareTag("Pickup"))
         {
@@ -376,6 +394,10 @@ public class PlayerBehaviour : MonoBehaviour
                     currentObj = null; // Reset currentObj to null
                     currentScore += 1;
                     progress.text = currentScore * 25 + "%";
+                    if (currentScore >= 4)
+                    {
+                        WinGame(); // Call the WinGame method if all objectives are collected
+                    }
                 }
 
             }
@@ -478,10 +500,18 @@ public class PlayerBehaviour : MonoBehaviour
                 BubbleImageUI.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f); // Set the scale of the Bubble icon in the UI
 
             }
-            score.text = objectivesCollected.Count + "/4";
-        
+            if (objectivesCollected.Count >= 4)
+            {
+                score.text = objectivesCollected.Count + "/4 <br> Remember to place them in your ship!";
+            }
+            else
+            {
+                score.text = objectivesCollected.Count + "/4";
+            }
+            
+
         }
-        
+
     }
 
     // Method to modify the player's health
@@ -533,12 +563,13 @@ public class PlayerBehaviour : MonoBehaviour
                 currentDoor = null;
             }
         }
-         
+
     }
     void OnFire()
     {
         if (hasGun)
         {
+            audioSource.Play(); // Play the shooting sound
             GameObject newProjectile = Instantiate(projectile, spawnPoint.position, projectile.transform.rotation);
             Vector3 fireForce = spawnPoint.forward * fireStrength;
             newProjectile.GetComponent<Rigidbody>().AddForce(fireForce);
@@ -546,10 +577,21 @@ public class PlayerBehaviour : MonoBehaviour
         }
 
     }
+    void OnTriggerEnter(Collider other)
+    {
+        // Check if the player enters a hazard trigger
+        if (other.CompareTag("Hazard"))
+        {
+            AudioSource damageAudioSource = other.GetComponent<AudioSource>();
+            damageAudioSource.time = 0.1f; // Reset the audio source time to the beginning
+            damageAudioSource.Play(); // Play the damage sound effect
+        }
+    }
     void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("Hazard"))
         {
+
             damageIndicator.GetComponent<Image>().color = Color.red; // Set the damage indicator color to red
             damageIndicator.GetComponent<Image>().CrossFadeAlpha(1.0f, 0.1f, false); // Make the damage indicator fully visible
             damageIndicator.GetComponent<Image>().CrossFadeAlpha(0.0f, 0.7f, false); // Fade out the damage indicator after a short duration
@@ -569,5 +611,15 @@ public class PlayerBehaviour : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         tutorialImage.CrossFadeAlpha(0.0f, 0.7f, false); // Fade out the tutorial image after the delay
+    }
+    public void WinGame()
+    {
+        winScreen.GetComponent<AudioSource>().Play(); // Play the win screen audio
+        PlayerUI.enabled = false; // Disable the main player UI
+        winScreen.enabled = true; // Enable the win screen
+        Cursor.lockState = CursorLockMode.None; // Unlock the cursor
+        gameObject.GetComponent<FirstPersonController>().enabled = false; // Disable the character controller to prevent movement
+        winText.text = "Deaths= " + deathCount;
+
     }
 }

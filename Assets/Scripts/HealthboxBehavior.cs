@@ -20,13 +20,15 @@ public class HealthboxBehavior : MonoBehaviour
                            // Start is called once before the first execution of Update after the MonoBehaviour is created
     [SerializeField]
     float spawnDelay = 0.5f; // Delay between spawning health pickups
+    AudioSource audioSource; // Audio source for playing sounds
     List<int> rotations = new List<int>(); // List to store random rotations for health pickups
     
     public void Interact()
     {
         if (canInteract)
         {
-            
+            audioSource = GetComponent<AudioSource>(); // Get the AudioSource component attached to the healthbox
+            audioSource.Play(); // Play the interaction sound
             canInteract = false; // Prevent further interactions until the coroutine completes
             float spawnCount = 0; // Counter to track the number of health pickups spawned
             for (int i = 0; i < healthAmount; i++)

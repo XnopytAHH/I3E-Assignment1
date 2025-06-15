@@ -156,3 +156,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healing: 10
+  healthPickupAudioClip: {fileID: 8300000, guid: b3711937b48d8704d8cf38ce54691125, type: 3}

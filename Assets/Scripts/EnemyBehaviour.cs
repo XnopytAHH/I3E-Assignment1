@@ -19,6 +19,9 @@ public class EnemyBehaviour : MonoBehaviour
     float detectionRange = 10f; // Range within which the enemy can detect the player
     bool canShoot = false; // Flag to control shooting
     Animator animator; // Reference to the Animator component
+    [SerializeField]
+    AudioClip enemyDeathAudioClip; // Audio clip for enemy death sound
+    AudioSource audioSource; // Audio source for playing sounds
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -32,6 +35,7 @@ public class EnemyBehaviour : MonoBehaviour
         if (health <= 0)
         {
             Destroy(gameObject);
+            AudioSource.PlayClipAtPoint(enemyDeathAudioClip, transform.position, 2f); // Play death sound
             return; // If health is 0 or less, destroy the enemy and exit the update
         }
         else
@@ -85,6 +89,10 @@ public class EnemyBehaviour : MonoBehaviour
         yield return new WaitForSeconds(shootInterval); // Wait for 2 seconds before shooting
         if (canShoot)
         {
+            audioSource = GetComponent<AudioSource>(); // Get the AudioSource component
+            
+            audioSource.Play(); // Play the shooting sound
+            
             GameObject player = GameObject.FindWithTag("Player");
             Vector3 directionToPlayer = (player.transform.position - transform.position).normalized;
             GameObject newProjectile = Instantiate(projectile, spawnPoint.position, spawnPoint.rotation); // Instantiate the projectile at the spawn point

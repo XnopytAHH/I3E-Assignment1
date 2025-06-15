@@ -25,6 +25,9 @@ public class DoorBehaviour : MonoBehaviour
     bool slidingDoor = false; // Flag to indicate if the door is a sliding door
     [SerializeField]
     GameObject doorLock;
+    [SerializeField]
+    AudioClip unlockSound; // Sound to play when the door is unlocked
+    AudioSource doorAudioSource; // Audio source for playing door sounds
     private void Start()
     {
         doorIterAngle = doorOpenAngle / doorOpenSpeed; // Calculate the incremental angle based on speed and time
@@ -39,6 +42,7 @@ public class DoorBehaviour : MonoBehaviour
         }
         Vector3 doorRotation = transform.eulerAngles;
         doorCloseAngle = doorRotation.y; // Initialize the close angle to the current rotation
+        doorAudioSource = GetComponent<AudioSource>(); // Get the AudioSource component attached to the door
     }
     public void Interact()
     {
@@ -62,12 +66,13 @@ public class DoorBehaviour : MonoBehaviour
             Debug.Log("Opening door");
             count = 0;
             doorOpening = true;
-            if (doorPair!= null)
+            if (doorPair != null)
             {
                 doorPair.count = 0; // Reset the count for the paired door
                 doorPair.doorOpening = true; // Trigger the paired door to open
+                
             }
-            
+            doorAudioSource.Play(); // Play the door opening sound
             
             
 
@@ -79,6 +84,7 @@ public class DoorBehaviour : MonoBehaviour
             {
                 doorPair.count = 0; // Reset the count for the paired door
                 doorPair.doorClosing = true; // Trigger the paired door to close
+                doorAudioSource.Play(); // Play the door closing sound
             }
             
             count = 0;
@@ -197,6 +203,7 @@ public class DoorBehaviour : MonoBehaviour
         isLocked = false; // Unlock the door if all podiums are correct
         if (!slidingDoor)
         {
+            AudioSource.PlayClipAtPoint(unlockSound, doorLock.transform.position); // Play the unlock sound
             doorLock.SetActive(false); // Disable the door lock visual for regular doors
         }
         

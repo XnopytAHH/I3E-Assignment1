@@ -4,6 +4,8 @@ public class HealthPickupsBehaviour : MonoBehaviour
 {
     [SerializeField]
     int healing = 1; // Speed of rotation for the health pickup
+    [SerializeField]
+    AudioClip healthPickupAudioClip; // Audio clip for the health pickup sound
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -17,6 +19,7 @@ public class HealthPickupsBehaviour : MonoBehaviour
     }
     public void Pickup()
     {
+        AudioSource.PlayClipAtPoint(healthPickupAudioClip, transform.position, 0.3f); // Play the health pickup sound
         Debug.Log("health");
         Destroy(gameObject); // Destroy the health pickup after it has been picked up
         // Find the player object

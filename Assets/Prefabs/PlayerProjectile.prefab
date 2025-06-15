@@ -151,3 +151,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projDeathTime: 1
   projectileDamage: 10
+  projectileAudioClip: {fileID: 8300000, guid: 1db8a7439088a54448eef7e69ed7ce63, type: 3}

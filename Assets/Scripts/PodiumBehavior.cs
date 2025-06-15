@@ -12,10 +12,12 @@ public class PodiumBehavior : MonoBehaviour
     public bool ColorIsCorrect = false;
     [SerializeField]
     ParticleSystem particles;
+    AudioSource audioSource; // Audio source for playing sounds
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         particles.Stop(); // Stop the particle effect initially
+        audioSource = GetComponent<AudioSource>(); // Get the AudioSource component attached to the podium
     }
 
     // Update is called once per frame
@@ -35,7 +37,7 @@ public class PodiumBehavior : MonoBehaviour
     {
         if (floatingObject == null)
         {
-            
+            audioSource.Play(); // Play the placement sound
             // Instantiate the floating object at the specified position
             floatingObject = obj;
             if (floatingObject.GetComponent<PuzzleItemBehaviour>() != null)
