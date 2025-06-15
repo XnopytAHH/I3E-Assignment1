@@ -6,8 +6,6 @@ WASD - Movement<br/>
 Space - Jump<br/>
 E - Interact<br/>
 Left Click - Fire<br/>
-### How to use
-Run the Build Executable to run the game
 
 ## Intended platform and hardware
 Platform: Windows<br/>
