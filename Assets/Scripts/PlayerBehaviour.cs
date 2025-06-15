@@ -441,7 +441,7 @@ public class PlayerBehaviour : MonoBehaviour
         if (gameObject.collectibleType == "gun")
         {
             hasGun = true; // Set the hasGun flag to true   
-            Debug.Log("Player has collected a gun!"); // Log that the player has collected a gun
+            DisplayTutorial(3); // Display the tutorial for the gun
             gunImage.GetComponent<Image>().sprite = gunDisplaySprite; // Set the gun image sprite in the UI
             gunImage.SetActive(true); // Activate the gun image in the UI
         }
@@ -558,6 +558,7 @@ public class PlayerBehaviour : MonoBehaviour
     }
     public void DisplayTutorial(int tutorialNumber)
     {
+        StopCoroutine(HideTutorialAfterDelay(3.0f)); // Stop any existing coroutine to prevent overlapping fades
         tutorialImage.CrossFadeAlpha(1.0f, 0.1f, false);
         tutorialImage.sprite = tutorialSprites[tutorialNumber]; // Set the initial sprite for the tutorial image
         StartCoroutine(HideTutorialAfterDelay(3.0f)); // Start a coroutine to hide the tutorial image after a delay

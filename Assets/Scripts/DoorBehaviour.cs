@@ -23,13 +23,19 @@ public class DoorBehaviour : MonoBehaviour
     float closeDistance = 20f; // Distance at which the door closes automatically
     [SerializeField]
     bool slidingDoor = false; // Flag to indicate if the door is a sliding door
+    [SerializeField]
+    GameObject doorLock;
     private void Start()
     {
         doorIterAngle = doorOpenAngle / doorOpenSpeed; // Calculate the incremental angle based on speed and time
-        doorSlideDistance = doorSlideDistance/ doorOpenSpeed; // Calculate the incremental distance for sliding doors
+        doorSlideDistance = doorSlideDistance / doorOpenSpeed; // Calculate the incremental distance for sliding doors
         if (slidingDoor)
         {
             isLocked = false; // Sliding doors are not locked by default
+        }
+        else
+        {
+            doorLock.SetActive(true); // Enable the door lock visual if it's not a sliding door
         }
         Vector3 doorRotation = transform.eulerAngles;
         doorCloseAngle = doorRotation.y; // Initialize the close angle to the current rotation
@@ -47,6 +53,7 @@ public class DoorBehaviour : MonoBehaviour
             if (doorPair != null)
             {
                 doorPair.isLocked = false; // Ensure the paired door is also unlocked
+                
             }
             
         }
@@ -188,6 +195,11 @@ public class DoorBehaviour : MonoBehaviour
 
         }
         isLocked = false; // Unlock the door if all podiums are correct
+        if (!slidingDoor)
+        {
+            doorLock.SetActive(false); // Disable the door lock visual for regular doors
+        }
+        
         Debug.Log("Puzzle solved! The door is now unlocked.");
     }
 }

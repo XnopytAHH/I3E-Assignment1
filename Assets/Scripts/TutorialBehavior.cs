@@ -9,6 +9,7 @@ public class TutorialBehavior : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             other.GetComponent<PlayerBehaviour>().DisplayTutorial(tutorialStep);
+            Destroy(gameObject); // Destroy the tutorial object after displaying
         }
     }
 }
