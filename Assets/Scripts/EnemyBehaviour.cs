@@ -3,33 +3,67 @@ using JetBrains.Annotations;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
-
+/*
+* Author: Lim En Xu Jayson
+* Date: 9/6/2025
+* Description: Handles the behavior of enemies in the game, including health management, shooting projectiles at the player, and detecting the player within a certain range.
+*/
 public class EnemyBehaviour : MonoBehaviour
 {
-    float health = 100f; // Health of the enemy
+    /// <summary>
+    /// Health of the enemy. If it reaches 0, the enemy is destroyed.
+    /// </summary>
+    float health = 100f; 
+    /// <summary>
+    /// Projectile that the enemy will shoot at the player.
+    /// </summary>
     [SerializeField]
     GameObject projectile;
+    /// <summary>
+    /// Transform where the projectile will spawn when shot.
+    /// </summary>
     [SerializeField]
-    Transform spawnPoint; // Transform where the projectile spawns
+    Transform spawnPoint; 
+    /// <summary>
+    /// Strength of the projectile's fire force.
+    /// </summary>
     [SerializeField]
-    int fireStrength = 10; // Strength of the projectile fire force
+    int fireStrength = 10;
+    /// <summary>
+    /// Time interval between shots.
+    /// summary>
     [SerializeField]
-    float shootInterval = 2f; // Time interval between shots
+    float shootInterval = 2f; 
+    /// <summary>
+    /// Range within which the enemy can detect the player.
+    /// </summary>
     [SerializeField]
-    float detectionRange = 10f; // Range within which the enemy can detect the player
-    bool canShoot = false; // Flag to control shooting
-    Animator animator; // Reference to the Animator component
+    float detectionRange = 10f; 
+    /// <summary>
+    /// Flag to control whether the enemy can shoot or not.
+    /// </summary>
+    bool canShoot = false; 
+    /// <summary>
+    /// Animator component for controlling enemy animations.
+    /// </summary>
+    Animator animator; 
+    /// <summary>
+    /// Audio clip for the enemy's death sound.
+    /// </summary>
     [SerializeField]
-    AudioClip enemyDeathAudioClip; // Audio clip for enemy death sound
-    AudioSource audioSource; // Audio source for playing sounds
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    AudioClip enemyDeathAudioClip; 
+    /// <summary>
+    /// AudioSource component for playing sounds.
+    /// / </summary>
+    AudioSource audioSource; 
+    
     void Start()
     {
         animator = GetComponent<Animator>(); // Get the Animator component
         StartCoroutine(ShootTimer(shootInterval));
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
         if (health <= 0)
@@ -79,6 +113,9 @@ public class EnemyBehaviour : MonoBehaviour
             }
         }
     }
+    /// <summary>
+    /// Coroutine that handles the shooting timer.
+    /// </summary>
 
     IEnumerator ShootTimer(float shootInterval)
     {
@@ -101,6 +138,9 @@ public class EnemyBehaviour : MonoBehaviour
         }
         StartCoroutine(ShootTimer(shootInterval)); // Repeat the shooting every 2 seconds
     }
+    /// <summary>
+    /// Method to modify the enemy's health.
+    /// </summary>
     public void ModifyHealth(int amount)
     {
         Debug.Log($"Enemy health modified by {amount}. Current health: {health + amount}");

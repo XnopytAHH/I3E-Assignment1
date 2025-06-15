@@ -1,33 +1,86 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.ProBuilder.Shapes;
+/*
+* Author: Lim En Xu Jayson
+* Date: 9/6/2025
+* Description: Handles the behavior of doors in the game.
+*/
 
 public class DoorBehaviour : MonoBehaviour
 {
-    public  bool isLocked = true;
+    /// <summary>
+    ///  Indicates whether the door is locked or not.
+    /// </summary>
+    public bool isLocked = true;
+    /// <summary>
+    /// Indicates whether the door is currently open or closed.
+    /// </summary>
     public bool isOpen = false;
+    /// <summary>
+    /// Flags to indicate if the door is currently opening.
+    /// </summary>
     public bool doorOpening = false;
+    /// <summary>
+    /// Flags to indicate if the door is currently closing.
+    /// </summary>
     public bool doorClosing = false;
     [SerializeField]
-    float doorOpenSpeed = 20f; // Speed at which the door opens/closes
+    /// <summary>
+    /// Speed at which the door opens or closes.
+    /// </summary>
+    float doorOpenSpeed = 20f; 
+    /// <summary>
+    /// Angle to which the door opens when interacted with.
+    /// </summary>
     [SerializeField]
-    float doorOpenAngle = 90f; // Angle to open the door
-    float doorCloseAngle; // Angle to close the door (default is 0 degrees)
-    float doorIterAngle; // Incremental angle for each update
+    float doorOpenAngle = 90f; 
+    /// <summary>
+    /// Angle at which the door closes.
+    /// </summary>
+    float doorCloseAngle; 
+    /// <summary>
+    /// Incremental angle for the door's rotation based on speed and time.
+    /// </summary>
+    float doorIterAngle; 
+    /// <summary>
+    /// Distance the door slides when opened or closed (for sliding doors).
+    /// </summary>
     [SerializeField]
-    float doorSlideDistance = 0f; // Distance to slide the door (if applicable)
-    public int count = 0; // Counter to track the number of interactions
+    float doorSlideDistance = 0f; 
+    /// <summary>
+    /// Count to track the number of updates for opening or closing the door.
+    /// </summary>
+    public int count = 0; 
+    /// <summary>
+    /// Reference to the paired door that should open or close simultaneously.
+    ///     </summary>
     [SerializeField]
-    DoorBehaviour doorPair; // Reference to the paired door (if applicable)
+    DoorBehaviour doorPair; 
+    /// <summary>
+    /// Distance at which the door automatically closes if the player is too far away.
+    /// </summary>
     [SerializeField]
-    float closeDistance = 20f; // Distance at which the door closes automatically
+    float closeDistance = 20f; 
+    /// <summary>
+    /// Flag to indicate if the door is a sliding door.
+    /// </summary>
     [SerializeField]
-    bool slidingDoor = false; // Flag to indicate if the door is a sliding door
+    bool slidingDoor = false; 
+    /// <summary>
+    /// Reference to the door lock GameObject, which is used for visual representation of the door lock.
+    /// </summary>
     [SerializeField]
     GameObject doorLock;
+    /// <summary>
+    /// Audio clip to play when the door is unlocked.
+    /// </summary>
     [SerializeField]
-    AudioClip unlockSound; // Sound to play when the door is unlocked
-    AudioSource doorAudioSource; // Audio source for playing door sounds
+    AudioClip unlockSound; 
+    /// <summary>
+    /// Audio source for playing door sounds.
+    /// </summary>
+    AudioSource doorAudioSource; 
     private void Start()
     {
         doorIterAngle = doorOpenAngle / doorOpenSpeed; // Calculate the incremental angle based on speed and time
@@ -44,6 +97,10 @@ public class DoorBehaviour : MonoBehaviour
         doorCloseAngle = doorRotation.y; // Initialize the close angle to the current rotation
         doorAudioSource = GetComponent<AudioSource>(); // Get the AudioSource component attached to the door
     }
+    /// <summary>
+    /// Method to interact with the door, opening or closing it based on its current state.
+    /// If the door is locked, it will not open until the puzzle is solved.
+    /// </summary>
     public void Interact()
     {
         Vector3 doorRotation = transform.eulerAngles;
@@ -57,9 +114,9 @@ public class DoorBehaviour : MonoBehaviour
             if (doorPair != null)
             {
                 doorPair.isLocked = false; // Ensure the paired door is also unlocked
-                
+
             }
-            
+
         }
         if (!isOpen)
         {
@@ -70,11 +127,11 @@ public class DoorBehaviour : MonoBehaviour
             {
                 doorPair.count = 0; // Reset the count for the paired door
                 doorPair.doorOpening = true; // Trigger the paired door to open
-                
+
             }
             doorAudioSource.Play(); // Play the door opening sound
-            
-            
+
+
 
 
         }
@@ -86,7 +143,7 @@ public class DoorBehaviour : MonoBehaviour
                 doorPair.doorClosing = true; // Trigger the paired door to close
                 doorAudioSource.Play(); // Play the door closing sound
             }
-            
+
             count = 0;
             doorClosing = true;
 
@@ -188,6 +245,10 @@ public class DoorBehaviour : MonoBehaviour
         }
         
     }
+    /// <summary>
+    /// Checks the puzzle state by verifying if all podiums have the correct color.
+    /// If all podiums are correct, the door is unlocked.
+    /// </summary>
     public void checkPuzzle()
     {
         var podiums = GameObject.FindGameObjectsWithTag("Puzzle");
@@ -206,7 +267,7 @@ public class DoorBehaviour : MonoBehaviour
             AudioSource.PlayClipAtPoint(unlockSound, doorLock.transform.position); // Play the unlock sound
             doorLock.SetActive(false); // Disable the door lock visual for regular doors
         }
-        
+
         Debug.Log("Puzzle solved! The door is now unlocked.");
     }
 }

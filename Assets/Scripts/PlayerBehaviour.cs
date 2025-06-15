@@ -9,99 +9,303 @@ using StarterAssets;
 using System.Security.Cryptography;
 using Unity.Collections;
 using UnityEngine.Rendering;
+/*
+* Author: Lim En Xu Jayson
+* Date: 9/6/2025 
+* Description: Handles the behavior of the player in the game.
+*/
+
 public class PlayerBehaviour : MonoBehaviour
 {
+    /// <summary>
+    /// playerSpawnPoint is a Transform that defines the initial spawn position of the player in the game world.
+    /// It is used to reset the player's position when they respawn after death.
+    /// It is set to a empty GameObject in the scene to dictate where the player will start the game and respawn after death.
+    /// </summary>
     [SerializeField]
-    Transform playerSpawnPoint; // Transform where the player spawns
-    int maxHealth = 100; // Player's maximum health
-    int currentHealth = 100; // Player's current health
-    int currentScore = 0; // Player's current score
-    bool canInteract = false; // Flag to check if the player can interact with objects
-    CollectibleBehaviour currentCollectible = null; // Stores the current coin object the player has detected
-    DoorBehaviour currentDoor = null; // Stores the current door object the player has detected
-    HealthboxBehavior currentBox = null; // Stores the current health box object the player has detected
-    ShipComponents currentObj = null; // Stores the current health box object the player has detected
-    PodiumBehavior currentPodium = null; // Stores the current podium object the player has detected
-    PuzzleItemBehaviour currentItem = null; // Stores the current puzzle item object the player has detected
+    Transform playerSpawnPoint; 
+    /// <summary>
+    /// maxHealth is an integer that defines the maximum health of the player.
+    /// It is set to 100 by default and is used to determine the player's health status in the game.
+    /// </summary>
+    int maxHealth = 100; 
+    /// <summary>
+    /// currentHealth is an integer that represents the player's current health.
+    /// It is 100 by default and is raised and lowered during the game.
+    /// </summary>
+    int currentHealth = 100; 
+    /// <summary>
+    /// currentScore is an integer that represents the player's current score.
+    /// The score is incremented when the player fixes areas of their ship
+    /// </summary>
+    int currentScore = 0; 
+    /// <summary>
+    /// canInteract is a boolean that indicates whether the player can interact with objects in the game.
+    /// It is set to false by default and is set to true when the player is within range of an interactable object.
+    /// </summary>
+    bool canInteract = false; 
+    /// <summary>
+    /// currentCollectible stores the current coin object the player has detected.
+    /// It is set to null by default and is assigned when the player detects a collectible object with the Raycast.
+    /// </summary>
+    CollectibleBehaviour currentCollectible = null; 
+    /// <summary>
+    /// currentDoor stores the current door object the player has detected.
+    /// It is set to null by default and is assigned when the player detects a door object with the Raycast.
+    /// </summary>
+    DoorBehaviour currentDoor = null; 
+    /// <summary>
+    /// currentBox stores the current health box object the player has detected.
+    /// It is set to null by default and is assigned when the player detects a health box object with the Raycast.
+    /// </summary>
+    HealthboxBehavior currentBox = null; 
+    /// <summary>
+    /// currentObj stores the current health box object the player has detected.
+    /// It is set to null by default and is assigned when the player detects a ship component object with the Raycast.
+    ShipComponents currentObj = null; 
+    /// <summary>
+    /// currentPodium stores the current podium object the player has detected.
+    /// It is set to null by default and is assigned when the player detects a podium object with the Raycast.
+    /// </summary>
+    PodiumBehavior currentPodium = null; 
+    /// <summary>
+    /// currentItem stores the current puzzle item object the player has detected.
+    /// It is set to null by default and is assigned when the player detects a puzzle item object with the Raycast.
+    /// </summary>
+    PuzzleItemBehaviour currentItem = null; 
+    /// <summary>
+    /// interactDistance is a float that defines the distance within which the player can interact with objects.
+    /// It is set to 2.0f by default and is used to determine the range of interaction for the player.
+    /// </summary>
     [SerializeField]
-    float interactDistance = 2.0f; // Distance within which the player can interact with objects
+    float interactDistance = 2.0f; 
+    /// <summary>
+    /// projectile identifies the projectile prefab that the player can fire.
+    /// It is set to a prefab in the scene and is used to create projectiles when the player fires their weapon.
+    /// </summary>
     [SerializeField]
-    GameObject projectile = null; // Projectile prefab to instantiate when firing
+    GameObject projectile = null; 
+    /// <summary>
+    /// spawnPoint stores the position and rotation of where the projectile will spawn when fired.
+    /// It is set to a empty game object in the scene and is used to determine the spawn point of the projectile.
+    /// </summary>
     [SerializeField]
-    Transform spawnPoint; // Transform where the projectile spawns
+    Transform spawnPoint; 
+    /// <summary>
+    /// carryPoint stores the position where the player carries an item.
+    /// It is set to a empty game object in the scene and is used to determine where the carried item will be positioned in front of the player.
+    /// It is used in the puzzle item interaction to place the item in front of the player when they pick it up.
+    /// </summary>
     [SerializeField]
-    Transform carryPoint; // Transform where the item is carried
+    Transform carryPoint; 
+    /// <summary>
+    /// fireStrength is an integer that defines the strength of the projectile fire force.
+    /// It is set to 0 by default and is used to determine how fast the projectile will travel when fired.
+    /// </summary>
     [SerializeField]
-    int fireStrength = 0; // Strength of the projectile fire force
+    int fireStrength = 0; 
+    /// <summary>
+    /// healthText is a TextMeshProUGUI component that displays the player's current health in the UI.
+    /// It is set to a TextMeshProUGUI component in the scene and is used to update the player's health status in the UI.
+    /// </summary>
     [SerializeField]
-    TextMeshProUGUI healthText; // Text component to display player's health
-
+    TextMeshProUGUI healthText; 
+    /// <summary>
+    /// PlayerUI is a Canvas component that displays the player's UI elements.
+    /// </summary>
     [SerializeField]
-    Canvas PlayerUI; // Canvas to display UI elements
-
+    Canvas PlayerUI; 
+    /// <summary>
+    /// DeathUI is a Canvas component that displays the death UI elements when the player dies.
+    /// It is set to a Canvas component in the scene and is used to show the death screen when the player dies.
+    /// </summary>
     [SerializeField]
     Canvas DeathUI;
+    /// <summary>
+    /// gunImage is a GameObject that displays the gun image that is shown on the player's UI.
+    /// It is activated when the player collects a gun.
+    /// </summary>
     [SerializeField]
-    GameObject gunImage; // Image component to display the gun icon
+    GameObject gunImage; 
+    /// <summary>
+    /// gunDisplaySprite is a Sprite that represents the gun icon in the UI.
+    /// It is set to a Sprite in the scene and is used to display the gun icon when the player collects a gun.
+    /// </summary>
     [SerializeField]
-    Sprite gunDisplaySprite; // Sprite for the gun icon
-    bool hasGun = false; // Flag to check if the player has a gun
-    List<string> objectivesCollected = new List<string>(); // Array to store collected objectives
+    Sprite gunDisplaySprite;
+    /// <summary>
+    /// hasGun is a boolean that indicates whether the player has collected a gun.
+    /// It is set to false by default and is set to true when the player collects a gun.
+    /// </summary>
+    bool hasGun = false;
+    /// <summary>
+    /// objectivesCollected is a List that stores the names of the objectives that the player has collected.
+    /// It acts as an inventory for the player's collected objectives.
+    /// </summary>
+    List<string> objectivesCollected = new List<string>();
+    /// <summary>
+    /// dammageIndicator is a red UI element that indicates when the player has taken damage.
+    /// </summary>
     [SerializeField]
-    GameObject damageIndicator; // GameObject to indicate damage taken by the player
-    GameObject carriedItem = null; // Flag to check if the player is carrying an item
+    GameObject damageIndicator; 
+    /// <summary>
+    /// carriedItem is a GameObject that stores the item the player is currently carrying.
+    /// </summary>
+    GameObject carriedItem = null;
+    /// <summary>
+    /// gunSprites is an array of Sprites that represent the gun icon in the UI.
+    /// </summary>
     [SerializeField]
-    Sprite[] gunSprites; // Array of sprites for the gun UI
+    Sprite[] gunSprites; 
+    /// <summary>
+    /// gunImageUI is an Image component that displays the gun icon in the UI.
+    /// It is set to an Image component in the scene and is used to update the gun icon in the UI.
+    /// </summary>
     [SerializeField]
-    Image gunImageUI; // Image component to display the gun icon in the UI
+    Image gunImageUI; 
+    /// <summary>
+    /// wingLSprites is an array of Sprites that represent the left wing icon in the UI.
+    /// It is used to display the left wing icon when the player collects the left wing objective.
+    /// </summary>
     [SerializeField]
-    Sprite[] wingLSprites; // Array of sprites for the gun UI
+    Sprite[] wingLSprites; 
+    /// <summary>
+    /// wingLImageUI is an Image component that displays the left wing icon in the UI.
+    /// It is set to an Image component in the scene and is used to update the left wing icon in the UI.
+    /// </summary>
     [SerializeField]
-    Image wingLImageUI; // Image component to display the gun icon in the UI
+    Image wingLImageUI; 
+    /// <summary>
+    /// wingRSprites is an array of Sprites that represent the right wing icon in the UI.
+    /// It is used to display the right wing icon when the player collects the right wing objective.
+    ///     </summary>
     [SerializeField]
-    Sprite[] wingRSprites; // Array of sprites for the gun UI
+    Sprite[] wingRSprites; 
+    /// <summary>
+    /// wingRImageUI is an Image component that displays the right wing icon in the UI.
+    /// It is set to an Image component in the scene and is used to update the right wing icon in the UI.
+    /// </summary>
     [SerializeField]
-    Image wingRImageUI; // Image component to display the gun icon in the UI
+    Image wingRImageUI; 
+    /// <summary>
+    /// GeneratorSprites is an array of Sprites that represent the generator icon in the UI.
+    /// It is used to display the generator icon when the player collects the generator objective.
+    /// </summary>
     [SerializeField]
-    Sprite[] GeneratorSprites; // Array of sprites for the gun UI
+    Sprite[] GeneratorSprites;
+    /// <summary>
+    /// GeneratorImageUI is an Image component that displays the generator icon in the UI.
+    /// It is set to an Image component in the scene and is used to update the generator icon in the UI.
+    /// </summary>
     [SerializeField]
-    Image GeneratorImageUI; // Image component to display the gun icon in the UI
+    Image GeneratorImageUI;
+    /// <summary>
+    /// BubbleSprites is an array of Sprites that represent the bubble icon in the UI.
+    /// It is used to display the bubble icon when the player collects the bubble objective.
+    /// </summary>
     [SerializeField]
-    Sprite[] BubbleSprites; // Array of sprites for the gun UI
+    Sprite[] BubbleSprites;
+    /// <summary>
+    /// BubbleImageUI is an Image component that displays the bubble icon in the UI.
+    /// It is set to an Image component in the scene and is used to update the bubble icon in the UI.
+    /// </summary>
     [SerializeField]
-    Image BubbleImageUI; // Image component to display the gun icon in the UI
+    Image BubbleImageUI;
+    /// <summary>
+    /// healthImageUI is an Image component that displays the health icon in the UI.
+    /// It is set to an Image component in the scene and is used to update the health icon based on the player's current health.
+    /// </summary>
     [SerializeField]
-    Image healthImageUI; // Image component to display the health icon in the UI
+    Image healthImageUI; 
+    /// <summary>
+    /// healthSprites is an array of Sprites that represent the health icon in the UI.
+    /// It is used to display different health icons based on the player's current health status.
+    /// It has 3 different sprites for healthy, wounded, and injured states.
+    /// </summary>
     [SerializeField]
-    Sprite[] healthSprites; // Array of sprites for the health icon in the UI
+    Sprite[] healthSprites;
+    /// <summary>
+    /// wingLtickImageUI is an Image component that displays the tick icon for the left wing in the UI.
+    /// It is set to an Image component in the scene and is used to indicate that the left wing objective has been added to the ship.
+    /// </summary>
     [SerializeField]
-    Image wingLtickImageUI; // Image component to display the wingL tick icon in the UI
+    Image wingLtickImageUI; 
+    /// <summary>
+    /// wingRtickImageUI is an Image component that displays the tick icon for the right wing in the UI.
+    /// It is set to an Image component in the scene and is used to indicate that the right wing objective has been added to the ship.
+    /// </summary>
     [SerializeField]
-    Image wingRtickImageUI; // Image component to display the wingR tick icon in the UI
+    Image wingRtickImageUI; 
+    /// <summary>
+    /// GeneratorTickImageUI is an Image component that displays the tick icon for the generator in the UI.
+    /// It is set to an Image component in the scene and is used to indicate that the generator objective has been added to the ship.
+    /// </summary>
     [SerializeField]
-    Image GeneratorTickImageUI; // Image component to display the Generator tick icon in the UI
+    Image GeneratorTickImageUI;
+    /// <summary>
+    /// BubbleTickImageUI is an Image component that displays the tick icon for the bubble in the UI.
+    /// It is set to an Image component in the scene and is used to indicate that the bubble objective has been added to the ship.
+    /// </summary>
     [SerializeField]
-    Image BubbleTickImageUI; // Image component to display the Bubble tick icon in the UI
+    Image BubbleTickImageUI; 
+    /// <summary>
+    /// TickSprite is a Sprite that represents the tick icon in the UI.
+    /// It is used to indicate that an objective has been collected and added to the ship.
+    /// </summary>
     [SerializeField]
-    Sprite TickSprite; // Sprite for the tick icon in the UI
+    Sprite TickSprite; 
+    /// <summary>
+    /// score is a TextMeshPro component that displays the player's current score in the UI.
+    /// </summary>
     [SerializeField]
     TextMeshProUGUI score;
+    /// <summary>
+    /// progress is a TextMeshPro component that displays the player's progress in the UI.
+    /// </summary>
     [SerializeField]
     TextMeshProUGUI progress;
-
+    /// <summary>
+    /// tutorialImage is an Image component that displays the tutorials in the UI.
+    /// </summary>
     [SerializeField]
-    Image tutorialImage; // Image component to display the tutorial icon in the UI
+    Image tutorialImage; 
+    /// <summary>
+    /// tutorialSprites is an array of Sprites that represent the tutorial images in the UI.
+    /// It is used to display different tutorial images based on the player's progress in the game.
+    /// </summary>
     [SerializeField]
-    Sprite[] tutorialSprites; // Sprite for the tutorial icon in the UI
+    Sprite[] tutorialSprites; 
+    /// <summary>
+    /// deathCount is an integer that keeps track of the number of times the player has died in the game.
+    /// it is used to display the death count on the win screen.
+    /// </summary>
     int deathCount = 0;
+    /// <summary>
+    /// winScreen is a Canvas component that displays the win screen when the player completes the game.
+    /// It is set to a Canvas component in the scene and is used to show the win screen when the player collects all objectives and fully repairs their ship.
+    /// </summary>
     [SerializeField]
-    Canvas winScreen; // Canvas to display the win screen
+    Canvas winScreen; 
+    /// <summary>
+    /// winText is a TextMeshPro component that displays the death count on the win screen.
+    /// </summary>
     [SerializeField]
-    TextMeshProUGUI winText; // Text component to display the win message
-    AudioSource audioSource; // Audio source for playing sounds
+    TextMeshProUGUI winText; 
+    /// <summary>
+    /// audioSource is an AudioSource component that plays sound effects in the game.
+    /// It is used to play the shooting sound
+    /// </summary>
+    AudioSource audioSource; 
+    /// <summary>
+    /// deathAudioClip is an AudioClip that plays when the player dies.
+    /// It is set to an AudioClip in the scene and is used to play the death sound effect when the player dies.
+    /// </summary>
     [SerializeField]
-    AudioClip deathAudioClip; // Audio clip for the death sound
-
+    AudioClip deathAudioClip; 
+    /// <summary>
+    /// Start is called once at the beginning of the game.
+    /// It initializes most of the variables states
+    /// </summary>
     void Start()
     {
         healthText.text = "Health: " + currentHealth.ToString(); // Initialize health text
@@ -142,6 +346,10 @@ public class PlayerBehaviour : MonoBehaviour
 
 
     }
+    /// <summary>
+    /// Update is called once per frame.
+    /// It checks for raycasts to detect interactable objects and updates the player's health and UI elements accordingly.
+    /// </summary>
     void Update()
     {
         RaycastHit hitInfo;
@@ -270,8 +478,11 @@ public class PlayerBehaviour : MonoBehaviour
             gunImageUI.sprite = gunSprites[0]; // Set the no gun icon sprite
         }
     }
-    // The Interact callback for the Interact Input Action
-    // This method is called when the player presses the interact button
+    /// <summary>
+    /// Death is a function that is called when the player's health reaches zero.
+    /// It disables the main player UI, enables the death UI, resets the player's health, unlocks the cursor, increments the death count, and disables the character controller to prevent movement.
+    /// It also plays a death sound effect.
+    /// </summary>
     void Death()
     {
         PlayerUI.enabled = false; // Disable the main player UI
@@ -283,6 +494,10 @@ public class PlayerBehaviour : MonoBehaviour
         AudioSource.PlayClipAtPoint(deathAudioClip, transform.position, 0.5f); // Play the death sound effect
 
     }
+    /// <summary>
+    /// Respawn is a function that resets the player to their spawn point after death
+    /// It resets the player's health to maximum, updates the health text, enables the main player UI, disables the death UI, locks the cursor, and re-enables the character controller to allow movement.
+    /// </summary>
     public void Respawn()
     {
         // Reset the player's position to the spawn point
@@ -303,7 +518,10 @@ public class PlayerBehaviour : MonoBehaviour
 
 
     }
-
+    /// <summary>
+    /// OnCollisionEnter detects collisions with other objects in the game.
+    /// It is used to check if the player collides with a projectile or a health pickup.
+    /// </summary>
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Projectile"))
@@ -334,6 +552,10 @@ public class PlayerBehaviour : MonoBehaviour
         }
 
     }
+    /// <summary>
+    /// OnInteract is a function that is called when the player interacts with an object in the game.
+    /// It checks if the player can interact with objects and performs the appropriate action based on the type of object detected.
+    /// </summary>
     void OnInteract()
     {
         // Check if the player can interact with objects
@@ -453,10 +675,10 @@ public class PlayerBehaviour : MonoBehaviour
         }
     }
 
-    // Method to modify the player's score
-    // This method takes an integer amount as a parameter
-    // It adds the amount to the player's current score
-    // The method is public so it can be accessed from other scripts
+    /// <summary>
+    /// collectedSomething is a function that is called when the player collects an object in the game.
+    /// It checks the type of collectible and modifies the player's score and UI accordingly.
+    /// </summary>
     public void collectedSomething(CollectibleBehaviour gameObject)
     {
         // Check the type of collectible and modify the score accordingly
@@ -514,10 +736,9 @@ public class PlayerBehaviour : MonoBehaviour
 
     }
 
-    // Method to modify the player's health
-    // This method takes an integer amount as a parameter
-    // It adds the amount to the player's current health
-    // The method is public so it can be accessed from other scripts
+    /// <summary>
+    /// ModifyHealth is a function that modifies the player's health by a specified amount.
+    /// </summary>
     public void ModifyHealth(int amount)
     {
         // Check if the current health is less than the maximum health
@@ -534,37 +755,10 @@ public class PlayerBehaviour : MonoBehaviour
         healthText.text = "Health: " + currentHealth.ToString(); // Update the health text
     }
 
-    // Trigger Callback for when the player exits a trigger collider
-    void OnTriggerExit(Collider other)
-    {
-        // Check if the player has a detected coin or door
-        if (currentCollectible != null)
-        {
-            // If the object that exited the trigger is the same as the current coin
-            if (other.gameObject == currentCollectible.gameObject)
-            {
-                // Set the canInteract flag to false
-                // Set the current coin to null
-                // This prevents the player from interacting with the coin
-                canInteract = false;
-                currentCollectible.Unhighlight();
-                currentCollectible = null;
-            }
-        }
-        if (currentDoor != null)
-        {
-            // If the object that exited the trigger is the same as the current door
-            if (other.gameObject == currentDoor.gameObject)
-            {
-                // Set the canInteract flag to false
-                // Set the current door to null
-                // This prevents the player from interacting with the door
-                canInteract = false;
-                currentDoor = null;
-            }
-        }
-
-    }
+    /// <summary>
+    /// OnFire is a function that is called when the player fires their gun.
+    /// It checks if the player has a gun and plays the shooting sound effect.
+    /// </summary>
     void OnFire()
     {
         if (hasGun)
@@ -577,6 +771,11 @@ public class PlayerBehaviour : MonoBehaviour
         }
 
     }
+    /// <summary>
+    /// OnTriggerEnter is a function that is called when the player enters a trigger collider.
+    /// It is used for the lava hazard in the game.
+    /// It plays a damage sound effect when the player enters a hazard trigger 
+    /// </summary>
     void OnTriggerEnter(Collider other)
     {
         // Check if the player enters a hazard trigger
@@ -587,6 +786,11 @@ public class PlayerBehaviour : MonoBehaviour
             damageAudioSource.Play(); // Play the damage sound effect
         }
     }
+    /// <summary>
+    /// OnTriggerStay is a function that is called every frame while the player is inside a trigger collider.
+    /// It is used for the lava hazard in the game.
+    /// It reduces the player's health by 1 every frame while the player is inside the hazard trigger.
+    /// </summary>
     void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("Hazard"))
@@ -598,6 +802,9 @@ public class PlayerBehaviour : MonoBehaviour
             ModifyHealth(-1); // Reduce health by 1 every frame while in the hazard
         }
     }
+    /// <summary>
+    /// DisplayTutorial is a function that displays a tutorial image based on the tutorial number.
+    /// </summary>
     public void DisplayTutorial(int tutorialNumber)
     {
         StopCoroutine(HideTutorialAfterDelay(3.0f)); // Stop any existing coroutine to prevent overlapping fades
@@ -607,11 +814,17 @@ public class PlayerBehaviour : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// HideTutorialAfterDelay is a coroutine that waits for a specified delay before fading out the tutorial image.
+    /// </summary>
     IEnumerator HideTutorialAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
         tutorialImage.CrossFadeAlpha(0.0f, 0.7f, false); // Fade out the tutorial image after the delay
     }
+    /// <summary>
+    /// WinGame is a function that is called when the player wins the game.
+    /// </summary>
     public void WinGame()
     {
         winScreen.GetComponent<AudioSource>().Play(); // Play the win screen audio

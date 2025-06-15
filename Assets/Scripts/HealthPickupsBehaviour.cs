@@ -1,16 +1,23 @@
 using UnityEngine;
+/*
+* Author: Lim En Xu Jayson
+* Date: 10/6/2025
+* Description: Handles the behavior of health pickups in the game.
+*/
 
 public class HealthPickupsBehaviour : MonoBehaviour
 {
+    /// <summary>
+    /// Health of the health pickup. When picked up, it heals the player by this amount.
+    /// </summary>
     [SerializeField]
-    int healing = 1; // Speed of rotation for the health pickup
+    int healing = 1;
+    /// <summary>
+    /// Audio clip for the health pickup sound
+    /// </summary>
     [SerializeField]
     AudioClip healthPickupAudioClip; // Audio clip for the health pickup sound
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-
-    }
+    
 
     // Update is called once per frame
     void Update()
