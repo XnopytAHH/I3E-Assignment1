@@ -1,4 +1,4 @@
-# I3E Assignment 1 - Alien Ship Repair
+# Alien Ship Repair
 ## Brief overview
 This game is a simple game where the player must find their ship's broken pieces and repair their ship to win.
 ### Controls
